@@ -1,0 +1,375 @@
+openapi: 3.0.3
+info:
+  title: Social Network API
+  description: API для управления пользователями, друзьями и постами в социальной сети.
+  version: 1.0.0
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+tags:
+  - name: users
+    description: Операции с пользователями и их друзьями
+  - name: posts
+    description: Операции с постами
+  - name: messages
+    description: Операции с сообщениями
+  - name: chats
+    description: Операции с чатами и диалогами
+paths:
+  /users/{userId}/add_friend/{friend_id}:
+    get:
+      tags:
+        - users
+      summary: Добавить друга
+      description: Добавляет друга в список друзей пользователя.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID пользователя
+        - name: friend_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID друга
+      responses:
+        '200':
+          description: Друг успешно добавлен
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Friend added successfully"
+        '400':
+          description: Неверные параметры
+        '404':
+          description: Пользователь или друг не найден
+
+  /users/{userId}/delete_friend/{friend_id}:
+    delete:
+      tags:
+        - users
+      summary: Удалить друга
+      description: Удаляет друга из списка друзей пользователя.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID пользователя
+        - name: friend_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID друга
+      responses:
+        '200':
+          description: Друг успешно удален
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Friend removed successfully"
+        '400':
+          description: Неверные параметры
+        '404':
+          description: Пользователь или друг не найден
+
+  /users/{userId}/friends_list:
+    get:
+      tags:
+        - users
+      summary: Список друзей
+      description: Возвращает список друзей пользователя.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID пользователя
+      responses:
+        '200':
+          description: Список друзей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '404':
+          description: Пользователь не найден
+
+  /users/{userId}/profile:
+    get:
+      tags:
+        - users
+      summary: Просмотр анкеты пользователя
+      description: Возвращает информацию об анкете пользователя.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID пользователя
+      responses:
+        '200':
+          description: Анкета пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Пользователь не найден
+
+  /posts/create:
+    post:
+      tags:
+        - posts
+      summary: Создание поста
+      description: Публикация поста в ленту пользователя.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Id:
+                  type: string
+                owner:
+                  type: string
+                title:
+                  type: string
+                description:
+                  type: string
+                createdAt:
+                  type: string
+                  format: date-time
+                updatedAt:
+                  type: string
+                  format: date-time
+                state:
+                  type: string
+                  description: Статус поста (например, активен, архивирован)
+      responses:
+        '201':
+          description: Пост успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          description: Неверный ввод
+
+  /posts/media/upload:
+    post:
+      tags:
+        - posts
+      summary: Загрузка медиафайлов
+      description: Загрузка медиафайлов для поста.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Id:
+                  type: string
+                type:
+                  type: string
+                  description: Тип медиа (например, изображение, видео)
+                link:
+                  type: string
+                title:
+                  type: string
+                createdAt:
+                  type: string
+                  format: date-time
+                updatedAt:
+                  type: string
+                  format: date-time
+                state:
+                  type: string
+                  description: Статус медиафайла
+      responses:
+        '201':
+          description: Медиафайл успешно загружен
+        '400':
+          description: Неверный ввод
+
+  /posts:
+    get:
+      tags:
+        - posts
+      summary: Просмотр домашней ленты
+      description: Возвращает посты, которые видит пользователь в домашней ленте.
+      responses:
+        '200':
+          description: Лента постов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+
+  /posts/{userId}:
+    get:
+      tags:
+        - posts
+      summary: Лента постов пользователя
+      description: Возвращает посты конкретного пользователя.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID пользователя
+      responses:
+        '200':
+          description: Лента постов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+
+  /chats:
+    get:
+      tags:
+        - chats
+      summary: Просмотр диалогов
+      description: Возвращает список диалогов пользователя.
+      responses:
+        '200':
+          description: Список диалогов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Chat'
+
+  /messages/send:
+    post:
+      tags:
+        - messages
+      summary: Отправка сообщения
+      description: Отправляет сообщение в диалоге или чате.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Id:
+                  type: string
+                title:
+                  type: string
+                media:
+                  type: string
+                type:
+                  type: string
+                state:
+                  type: string
+      responses:
+        '201':
+          description: Сообщение отправлено
+        '400':
+          description: Неверный ввод
+
+  /messages:
+    get:
+      tags:
+        - messages
+      summary: Чтение сообщений
+      description: Возвращает список сообщений в диалоге или чате.
+      responses:
+        '200':
+          description: Список сообщений
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Message'
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        Id:
+          type: string
+        username:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+
+    Post:
+      type: object
+      properties:
+        Id:
+          type: string
+        owner:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        state:
+          type: string
+
+    Chat:
+      type: object
+      properties:
+        Id:
+          type: string
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+
+    Message:
+      type: object
+      properties:
+        Id:
+          type: string
+        title:
+          type: string
+        media:
+          type: string
+        type:
+          type: string
+        state:
+          type: string
